@@ -20,6 +20,7 @@ app.use(express.urlencoded({ extended: false }))
 // Rutas
 app.use('/api/paquetes', require('./routes/paquetesRoutes'))
 app.use('/api/contactos', require('./routes/contactosRoutes'))
+app.use('/api/usuarios', require('./routes/usuariosRoutes'))
 
 // Middleware de manejo de errores
 app.use(errorHandler)
