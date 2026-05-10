@@ -4,9 +4,17 @@ const asyncHandler = require('express-async-handler')
 const Usuario = require('../models/usuarioModel')
 
 const registrarUsuario = asyncHandler(async (req, res) => {
-    const { nombre, email, password } = req.body
+    const { nombre, email, password, telefono, direccion } = req.body
 
-    if (!nombre || !email || !password) {
+    if (
+        !nombre ||
+        !email ||
+        !password ||
+        !telefono ||
+        !direccion?.calle_numero ||
+        !direccion?.ciudad ||
+        !direccion?.estado
+    ) {
         res.status(400)
         throw new Error('Faltan datos')
     }
@@ -26,7 +34,9 @@ const registrarUsuario = asyncHandler(async (req, res) => {
     const usuario = await Usuario.create({
         nombre,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        telefono,
+        direccion
     })
 
     if (usuario) {
@@ -35,6 +45,8 @@ const registrarUsuario = asyncHandler(async (req, res) => {
             nombre: usuario.nombre,
             email: usuario.email,
             rol: usuario.rol,
+            telefono: usuario.telefono,
+            direccion: usuario.direccion,
             token: generarToken(usuario._id)
         })
     } else {
@@ -54,6 +66,8 @@ const loginUsuario = asyncHandler(async (req, res) => {
             nombre: usuario.nombre,
             email: usuario.email,
             rol: usuario.rol,
+            telefono: usuario.telefono,
+            direccion: usuario.direccion,
             token: generarToken(usuario._id)
         })
     } else {
