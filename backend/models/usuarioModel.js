@@ -17,6 +17,24 @@ const usuarioSchema = mongoose.Schema({
     rol: {
         type: String,
         default: 'cliente'
+    },
+    telefono: {
+        type: String,
+        required: [true, 'Por favor teclea tu teléfono']
+    },
+    direccion: {
+        calle_numero: {
+            type: String,
+            required: [true, 'Por favor teclea tu dirección']
+        },
+        ciudad: {
+            type: String,
+            required: [true, 'Por favor teclea tu ciudad']
+        },
+        estado: {
+            type: String,
+            required: [true, 'Por favor teclea tu estado']
+        }
     }
 }, {
     timestamps: true
