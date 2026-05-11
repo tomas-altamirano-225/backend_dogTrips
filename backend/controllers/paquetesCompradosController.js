@@ -2,9 +2,16 @@ const asyncHandler = require('express-async-handler')
 const PaqueteComprado = require('../models/paqueteCompradoModel')
 
 const getPaquetesComprados = asyncHandler(async (req, res) => {
-    const paquetesComprados = await PaqueteComprado.find({ usuario: req.usuario.id })
-        .populate('usuario')
-        .populate('paquete')
+    let paquetesComprados;
+    if (req.usuario.rol === 'admin') {
+        paquetesComprados = await PaqueteComprado.find()
+            .populate('usuario', 'nombre email')
+            .populate('paquete', 'titulo descripcion');
+    } else {
+        paquetesComprados = await PaqueteComprado.find({ usuario: req.usuario.id })
+            .populate('usuario', 'nombre email')
+            .populate('paquete', 'titulo descripcion');
+    }
     res.status(200).json(paquetesComprados)
 })
 

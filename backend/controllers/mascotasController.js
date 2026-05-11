@@ -2,7 +2,12 @@ const asyncHandler = require('express-async-handler')
 const Mascota = require('../models/mascotaModel')
 
 const getMascotas = asyncHandler(async (req, res) => {
-    const mascotas = await Mascota.find({ usuario: req.usuario.id }).populate('usuario')
+    let mascotas;
+    if (req.usuario.rol === 'admin') {
+        mascotas = await Mascota.find().populate('usuario', 'nombre email');
+    } else {
+        mascotas = await Mascota.find({ usuario: req.usuario.id }).populate('usuario', 'nombre email');
+    }
     res.status(200).json(mascotas)
 })
 
@@ -13,7 +18,7 @@ const setMascota = asyncHandler(async (req, res) => {
     }
     const mascota = await Mascota.create({
         ...req.body,
-        usuario: req.usuario.id
+        usuario: req.usuario.rol === 'admin' && req.body.usuario ? req.body.usuario : req.usuario.id
     })
     res.status(201).json(mascota)
 })
@@ -24,7 +29,7 @@ const updateMascota = asyncHandler(async (req, res) => {
         res.status(404)
         throw new Error('Mascota no encontrada')
     }
-    if (mascota.usuario.toString() !== req.usuario.id) {
+    if (mascota.usuario.toString() !== req.usuario.id && req.usuario.rol !== 'admin') {
         res.status(401)
         throw new Error('Usuario no autorizado')
     }
@@ -38,7 +43,7 @@ const deleteMascota = asyncHandler(async (req, res) => {
         res.status(404)
         throw new Error('Mascota no encontrada')
     }
-    if (mascota.usuario.toString() !== req.usuario.id) {
+    if (mascota.usuario.toString() !== req.usuario.id && req.usuario.rol !== 'admin') {
         res.status(401)
         throw new Error('Usuario no autorizado')
     }

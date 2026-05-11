@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler')
-const Paquete = require('../models/paqueteModel')
+const Paquete = require('../models/paquetesModel')
 
 const getPaquetes = asyncHandler(async (req, res) => {
     const paquetes = await Paquete.find()
@@ -7,11 +7,16 @@ const getPaquetes = asyncHandler(async (req, res) => {
 })
 
 const setPaquete = asyncHandler(async (req, res) => {
-    if (!req.body.nombre || !req.body.cantidad_viajes || !req.body.precio || !req.body.descripcion) {
+    if (!req.body.titulo || !req.body.viajes || !req.body.precio || !req.body.descripcion) {
         res.status(400)
         throw new Error('Por favor teclea todos los campos obligatorios del paquete')
     }
-    const paquete = await Paquete.create(req.body)
+    const paquete = await Paquete.create({
+        titulo: req.body.titulo,
+        precio: Number(req.body.precio),
+        descripcion: req.body.descripcion,
+        viajes: Number(req.body.viajes)
+    })
     res.status(201).json(paquete)
 })
 

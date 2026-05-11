@@ -6,7 +6,7 @@ const paquetesSchema = mongoose.Schema({
         required: [true, "Por favor ingrese el título del paquete"]
     },
     precio: {
-        type: String,
+        type: Number,
         required: [true, "Por favor ingrese el precio del paquete"]
     },
     descripcion: {

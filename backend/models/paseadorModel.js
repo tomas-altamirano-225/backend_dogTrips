@@ -15,7 +15,8 @@ const paseadorSchema = mongoose.Schema({
         required: [true, 'Por favor teclea el teléfono del paseador']
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    collection: 'paseadores'
 })
 
 module.exports = mongoose.model('Paseador', paseadorSchema)

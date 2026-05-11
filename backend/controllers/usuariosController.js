@@ -87,7 +87,14 @@ const generarToken = (id) => {
     })
 }
 
+const getUsuarios = asyncHandler(async (req, res) => {
+    // Solo devolvemos usuarios excluyendo su password
+    const usuarios = await Usuario.find({}).select('-password')
+    res.status(200).json(usuarios)
+})
+
 module.exports = {
     registrarUsuario,
-    loginUsuario
+    loginUsuario,
+    getUsuarios
 }
