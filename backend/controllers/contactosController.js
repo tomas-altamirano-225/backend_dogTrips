@@ -7,16 +7,17 @@ const getContactos = asyncHandler(async (req, res) => {
 })
 
 const addContacto = asyncHandler(async (req, res) => {
-    if (!req.body.nombre || !req.body.email || !req.body.nombre_perrito) {
+    const { dueno, mascota, estatus } = req.body;
+
+    if (!dueno || !mascota || !dueno.nombreCompleto || !dueno.email || !mascota.nombre) {
         res.status(400)
-        throw new Error("Por favor ingrese el nombre, email y nombre del perrito")
+        throw new Error("Por favor ingrese todos los datos obligatorios del dueño y la mascota")
     }
 
     const contacto = await Contacto.create({
-        nombre: req.body.nombre,
-        email: req.body.email,
-        nombre_perrito: req.body.nombre_perrito,
-        estatus: req.body.estatus || "Pendiente"
+        dueno,
+        mascota,
+        estatus: estatus || "Pendiente"
     })
 
     if (contacto) {
@@ -49,9 +50,28 @@ const deleteContacto = asyncHandler(async (req, res) => {
     res.status(200).json({ "Mensaje": `Contacto ${req.params.id} eliminado` })
 })
 
+const updateContactoEstatus = asyncHandler(async (req, res) => {
+    const contacto = await Contacto.findById(req.params.id)
+    if (!contacto) {
+        res.status(404)
+        throw new Error("Contacto no encontrado")
+    }
+
+    if (!req.body.estatus) {
+        res.status(400)
+        throw new Error("Por favor envíe el nuevo estatus")
+    }
+
+    contacto.estatus = req.body.estatus;
+    const contactoUpdated = await contacto.save();
+    
+    res.status(200).json(contactoUpdated)
+})
+
 module.exports = {
     getContactos,
     addContacto,
     updateContacto,
-    deleteContacto
+    deleteContacto,
+    updateContactoEstatus
 }

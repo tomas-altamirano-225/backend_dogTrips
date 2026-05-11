@@ -2,21 +2,21 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const asyncHandler = require('express-async-handler')
 const Usuario = require('../models/usuarioModel')
+const Contacto = require('../models/contactosModel')
 
 const registrarUsuario = asyncHandler(async (req, res) => {
-    const { nombre, email, password, telefono, direccion } = req.body
+    const { nombre, email, password } = req.body
 
-    if (
-        !nombre ||
-        !email ||
-        !password ||
-        !telefono ||
-        !direccion?.calle_numero ||
-        !direccion?.ciudad ||
-        !direccion?.estado
-    ) {
+    if (!nombre || !email || !password) {
         res.status(400)
-        throw new Error('Faltan datos')
+        throw new Error('Faltan datos obligatorios (nombre, email, password)')
+    }
+
+    // Verificar si tiene un Meet & Greet aprobado
+    const contacto = await Contacto.findOne({ 'dueno.email': email })
+    if (!contacto || contacto.estatus !== 'Aprobado') {
+        res.status(401)
+        throw new Error('Tu solicitud del Meet & Greet aún no ha sido aprobada')
     }
 
     // Verificar si el usuario existe
@@ -30,13 +30,17 @@ const registrarUsuario = asyncHandler(async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
-    // Crear el usuario
+    // Crear el usuario extrayendo info adicional del contacto
     const usuario = await Usuario.create({
         nombre,
         email,
         password: hashedPassword,
-        telefono,
-        direccion
+        telefono: contacto.dueno.telefono,
+        direccion: {
+            calle_numero: contacto.dueno.direccion.calleNumero,
+            ciudad: contacto.dueno.direccion.ciudad,
+            estado: contacto.dueno.direccion.estado
+        }
     })
 
     if (usuario) {
