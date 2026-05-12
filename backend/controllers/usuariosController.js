@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const asyncHandler = require('express-async-handler')
 const Usuario = require('../models/usuarioModel')
 const Contacto = require('../models/contactosModel')
+const Mascota = require('../models/mascotaModel')
 
 const registrarUsuario = asyncHandler(async (req, res) => {
     const { nombre, email, password } = req.body
@@ -42,6 +43,19 @@ const registrarUsuario = asyncHandler(async (req, res) => {
             estado: contacto.dueno.direccion.estado
         }
     })
+
+    // Migrar la información de la mascota desde el contacto a la colección de Mascotas
+    if (usuario && contacto.mascota) {
+        await Mascota.create({
+            nombre: contacto.mascota.nombre,
+            fecha_nacimiento: contacto.mascota.fechaNacimiento,
+            genero: contacto.mascota.genero,
+            raza: contacto.mascota.raza,
+            peso: 15, // Default ya que M&G no lo pide
+            tamaño: 'Mediano', // Default ya que M&G no lo pide
+            usuario: usuario._id
+        });
+    }
 
     if (usuario) {
         res.status(201).json({

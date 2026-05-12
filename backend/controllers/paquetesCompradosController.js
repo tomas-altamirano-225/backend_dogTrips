@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler')
 const PaqueteComprado = require('../models/paqueteCompradoModel')
+const Paquete = require('../models/paquetesModel')
 
 const getPaquetesComprados = asyncHandler(async (req, res) => {
     let paquetesComprados;
@@ -16,13 +17,27 @@ const getPaquetesComprados = asyncHandler(async (req, res) => {
 })
 
 const setPaqueteComprado = asyncHandler(async (req, res) => {
-    if (!req.body.viajes_restantes || !req.body.fecha_expiracion || !req.body.paquete) {
+    if (!req.body.paquete) {
         res.status(400)
-        throw new Error('Por favor teclea todos los campos obligatorios del paquete comprado')
+        throw new Error('Por favor especifica el paquete a adquirir')
     }
+
+    const paqueteDb = await Paquete.findById(req.body.paquete);
+    if (!paqueteDb) {
+        res.status(404);
+        throw new Error('Paquete no encontrado');
+    }
+
+    // Calcular fecha de expiración (1 año a partir de hoy)
+    const fechaExpiracion = new Date();
+    fechaExpiracion.setFullYear(fechaExpiracion.getFullYear() + 1);
+
     const paqueteComprado = await PaqueteComprado.create({
-        ...req.body,
-        usuario: req.usuario.id
+        paquete: req.body.paquete,
+        usuario: req.usuario.id,
+        viajes_restantes: paqueteDb.viajes,
+        fecha_expiracion: fechaExpiracion,
+        estado: 'activo'
     })
     res.status(201).json(paqueteComprado)
 })
